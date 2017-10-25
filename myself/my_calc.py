@@ -132,19 +132,6 @@ def main():
         result = interpreter.expr()
         print(str(result))
 
-        # interpreter = Interpreter(lexer)
-        # result = interpreter.expr()
-        # print(str(result))
-
-        '''
-        print(lexer.get_next_token())
-        print(lexer.get_next_token())
-        print(lexer.get_next_token())
-        print(lexer.get_next_token())
-        print(lexer.get_next_token())
-        '''
-
-
 if __name__ == '__main__':
     main()
 
