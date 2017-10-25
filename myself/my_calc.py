@@ -48,6 +48,7 @@ class Lexer(object):
         return int(result)
 
     def get_next_token(self):
+
         while self.current_char:
 
             if self.current_char.isspace():
@@ -75,36 +76,45 @@ class Lexer(object):
 
         return Token(EOF, None)
 
+
+class Interpreter:
+    def __init__(self, lexer):
+        self.lexer = lexer
+
     def eat(self, token_type):
-        print('eat:', self.current_token)
-        if self.current_token.type == token_type:
-            self.current_token = self.get_next_token()
+        print('eat:', self.lexer.current_token)
+        if self.lexer.current_token.type == token_type:
+            self.lexer.current_token = self.lexer.get_next_token()
 
     def expr(self):
-        self.current_token = self.get_next_token()
-        left = self.current_token
+
+        self.lexer.current_token = self.lexer.get_next_token()
+        result = self.lexer.current_token.value
         self.eat(INTEGER)
 
-        op = self.current_token
-        if op.type == PLUS:
-            self.eat(PLUS)
-        elif op.type == MINUS:
-            self.eat(MINUS)
-        elif op.type == MUL:
-            self.eat(MUL)
-        else:
-            self.eat(DIV)
+        while self.lexer.current_token.type in (PLUS, MINUS, MUL, DIV):
+            op = self.lexer.current_token
 
-        right = self.current_token
-        self.eat(INTEGER)
-        if op.type == PLUS:
-            result = left.value + right.value
-        elif op.type == MINUS:
-            result = left.value - right.value
-        elif op.type == MUL:
-            result = left.value * right.value
-        else:
-            result = left.value / right.value
+            if op.type == PLUS:
+                self.eat(PLUS)
+            elif op.type == MINUS:
+                self.eat(MINUS)
+            elif op.type == MUL:
+                self.eat(MUL)
+            else:
+                self.eat(DIV)
+
+            right = self.lexer.current_token
+            self.eat(INTEGER)
+
+            if op.type == PLUS:
+                result += right.value
+            elif op.type == MINUS:
+                result -= right.value
+            elif op.type == MUL:
+                result *= right.value
+            else:
+                result /= right.value
 
         return result
 
@@ -118,7 +128,8 @@ def main():
         if not text:
             continue
         lexer = Lexer(text)
-        result = lexer.expr()
+        interpreter = Interpreter(lexer)
+        result = interpreter.expr()
         print(str(result))
 
         # interpreter = Interpreter(lexer)
