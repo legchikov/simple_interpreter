@@ -25,7 +25,7 @@ class Lexer(object):
         self.current_token = None
 
     def error(self):
-        raise Exception('Lexer error')
+        raise Exception('Invalid syntax')
 
     def advance(self):
         self.pos += 1
@@ -49,7 +49,7 @@ class Lexer(object):
 
     def get_next_token(self):
 
-        while self.current_char:
+        while self.current_char is not None:
 
             if self.current_char.isspace():
                 self.skip_spaces()
@@ -74,6 +74,8 @@ class Lexer(object):
                 self.advance()
                 return Token(DIV, '/')
 
+            self.error()
+
         return Token(EOF, None)
 
 
@@ -85,39 +87,36 @@ class Interpreter:
         print('eat:', self.lexer.current_token)
         if self.lexer.current_token.type == token_type:
             self.lexer.current_token = self.lexer.get_next_token()
+        else:
+            self.lexer.error()
+
+    def term(self):
+        token = self.lexer.current_token
+        self.eat(INTEGER)
+        return token.value
 
     def expr(self):
 
         self.lexer.current_token = self.lexer.get_next_token()
-        result = self.lexer.current_token.value
-        self.eat(INTEGER)
+        result = self.term()
 
         while self.lexer.current_token.type in (PLUS, MINUS, MUL, DIV):
-            op = self.lexer.current_token
+            token = self.lexer.current_token
 
-            if op.type == PLUS:
+            if token.type == PLUS:
                 self.eat(PLUS)
-            elif op.type == MINUS:
+                result += self.term()
+            elif token.type == MINUS:
                 self.eat(MINUS)
-            elif op.type == MUL:
+                result -= self.term()
+            elif token.type == MUL:
                 self.eat(MUL)
+                result *= self.term()
             else:
                 self.eat(DIV)
-
-            right = self.lexer.current_token
-            self.eat(INTEGER)
-
-            if op.type == PLUS:
-                result += right.value
-            elif op.type == MINUS:
-                result -= right.value
-            elif op.type == MUL:
-                result *= right.value
-            else:
-                result /= right.value
+                result /= self.term()
 
         return result
-
 
 def main():
     while True:
