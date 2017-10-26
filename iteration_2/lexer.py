@@ -60,8 +60,3 @@ class Lexer:
             self.error()
 
         return Token(EOF, None)
-
-lexer = Lexer('1+2')
-print(lexer.get_next_token())
-print(lexer.get_next_token())
-print(lexer.get_next_token())
