@@ -82,26 +82,43 @@ class Lexer(object):
 class Interpreter:
     def __init__(self, lexer):
         self.lexer = lexer
+        self.current_token = self.lexer.get_next_token()
+
+    def error(self):
+        raise Exception('Invalid systax')
 
     def eat(self, token_type):
-        print('eat:', self.lexer.current_token)
-        if self.lexer.current_token.type == token_type:
-            self.lexer.current_token = self.lexer.get_next_token()
+        print('eat:', self.current_token)
+        if self.current_token.type == token_type:
+            self.current_token = self.lexer.get_next_token()
         else:
-            self.lexer.error()
+            self.error()
 
     def term(self):
-        token = self.lexer.current_token
+        result = self.factor()
+
+        while self.current_token.type in (MUL, DIV):
+            token = self.current_token
+
+            if token.type == MUL:
+                self.eat(MUL)
+                result *= self.factor()
+            else:
+                self.eat(DIV)
+                result /= self.factor()
+
+        return result
+
+    def factor(self):
+        token = self.current_token
         self.eat(INTEGER)
         return token.value
 
     def expr(self):
-
-        self.lexer.current_token = self.lexer.get_next_token()
         result = self.term()
 
-        while self.lexer.current_token.type in (PLUS, MINUS, MUL, DIV):
-            token = self.lexer.current_token
+        while self.current_token.type in (PLUS, MINUS):
+            token = self.current_token
 
             if token.type == PLUS:
                 self.eat(PLUS)
@@ -109,14 +126,9 @@ class Interpreter:
             elif token.type == MINUS:
                 self.eat(MINUS)
                 result -= self.term()
-            elif token.type == MUL:
-                self.eat(MUL)
-                result *= self.term()
-            else:
-                self.eat(DIV)
-                result /= self.term()
 
         return result
+
 
 def main():
     while True:
