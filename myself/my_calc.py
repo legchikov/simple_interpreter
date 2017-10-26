@@ -1,6 +1,7 @@
 
-INTEGER, PLUS, MINUS, MUL, DIV, EOF = 'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', 'EOF'
-
+INTEGER, PLUS, MINUS, MUL, DIV, EOF, LBRACKET, RBRACKET = (
+    'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', 'EOF', '(', ')'
+)
 
 class Token(object):
     def __init__(self, type, value):
@@ -74,6 +75,14 @@ class Lexer(object):
                 self.advance()
                 return Token(DIV, '/')
 
+            if self.current_char == '(':
+                self.advance()
+                return Token(LBRACKET, '(')
+
+            if self.current_char == ')':
+                self.advance()
+                return Token(RBRACKET, ')')
+
             self.error()
 
         return Token(EOF, None)
@@ -94,6 +103,17 @@ class Interpreter:
         else:
             self.error()
 
+    def factor(self):
+        token = self.current_token
+        if token.type == INTEGER:
+            self.eat(INTEGER)
+            return token.value
+        elif token.type == LBRACKET:
+            self.eat(LBRACKET)
+            result = self.expr()
+            self.eat(RBRACKET)
+            return result
+
     def term(self):
         result = self.factor()
 
@@ -108,11 +128,6 @@ class Interpreter:
                 result /= self.factor()
 
         return result
-
-    def factor(self):
-        token = self.current_token
-        self.eat(INTEGER)
-        return token.value
 
     def expr(self):
         result = self.term()
