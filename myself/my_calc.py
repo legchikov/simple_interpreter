@@ -97,7 +97,7 @@ class Interpreter:
         raise Exception('Invalid systax')
 
     def eat(self, token_type):
-        print('eat:', self.current_token)
+        #  print('eat:', self.current_token)
         if self.current_token.type == token_type:
             self.current_token = self.lexer.get_next_token()
         else:
